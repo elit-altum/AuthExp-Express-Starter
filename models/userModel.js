@@ -48,10 +48,6 @@ const userSchema = new mongoose.Schema({
 		type: Boolean,
 		default: true,
 	},
-	latestPost: {
-		type: Date,
-		default: 0,
-	},
 });
 
 // 1. Document middleware to hash the password before save

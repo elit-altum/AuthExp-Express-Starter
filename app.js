@@ -6,6 +6,7 @@ require("dotenv").config({
 const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 // Importing routers
 const userRouter = require("./routes/userRouter");
@@ -35,6 +36,9 @@ if (process.env.NODE_ENV === "development") {
 
 // Parse request body
 app.use(express.json());
+
+// Parse cookies
+app.use(cookieParser());
 
 // Mounting app routers
 app.use("/api/v1/users", userRouter);
