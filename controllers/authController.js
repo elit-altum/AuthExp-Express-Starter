@@ -6,7 +6,7 @@ const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 
-// 0. GENERATE JWT
+// *? 0. GENERATE JWT
 const generateJWT = (user, res) => {
 	const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
 		expiresIn: process.env.JWT_EXPIRE,
@@ -30,21 +30,23 @@ const generateJWT = (user, res) => {
 	});
 };
 
-// 1. SIGNUP NEW USER
+// *? 1. SIGNUP NEW USER
 exports.signupUser = catchAsync(async (req, res) => {
-	const { username, password, name, passwordConfirm } = req.body;
+	const { name, username, email, password, passwordConfirm } = req.body;
 
 	const user = await User.create({
 		username,
 		name,
+		email,
 		password,
 		passwordConfirm,
 	});
 
+	user.password = undefined;
 	generateJWT(user, res);
 });
 
-// 2. LOGIN EXISTING USER
+// *? 2. LOGIN EXISTING USER
 exports.loginUser = catchAsync(async (req, res) => {
 	const { username, password } = req.body;
 
@@ -69,7 +71,7 @@ exports.loginUser = catchAsync(async (req, res) => {
 	generateJWT(tempUser, res);
 });
 
-// 5. LOGOUT USER
+// *? 3. LOGOUT USER
 exports.logoutUser = (req, res) => {
 	res.cookie("jwt", "loggedOut", {
 		httpOnly: true,
@@ -81,7 +83,7 @@ exports.logoutUser = (req, res) => {
 	});
 };
 
-// 4. MIDDLEWARE: PROTECT ROUTE
+// *? 4. MIDDLEWARE: PROTECT ROUTE
 exports.protectRoute = catchAsync(async (req, res, next) => {
 	let token = "";
 
@@ -128,7 +130,7 @@ exports.protectRoute = catchAsync(async (req, res, next) => {
 	next();
 });
 
-// 5. MIDDLEWARE: RESTRICT TO ROLES ROUTE
+// *? 5. MIDDLEWARE: RESTRICT TO ROLES ROUTE
 // * Always use after protectRoute() middleware
 exports.restrictTo = (...roles) => {
 	return catchAsync(async (req, res, next) => {
@@ -139,3 +141,8 @@ exports.restrictTo = (...roles) => {
 		throw new AppError("You do not have permission to access this route.", 403);
 	});
 };
+
+// *? 6. PASSWORD RESET
+
+// * 6a. Generate Reset Email
+exports.generateResetToken = catchAsync(async (req, res) => {});

@@ -1,6 +1,7 @@
 // User schema/model
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema({
 	username: {
@@ -12,6 +13,12 @@ const userSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		lowercase: true,
+	},
+	email: {
+		type: String,
+		required: true,
+		unique: [true, "This email id is already in use. Please try to login."],
+		validate: [(val) => validator.isEmail(val)],
 	},
 	password: {
 		type: String,
