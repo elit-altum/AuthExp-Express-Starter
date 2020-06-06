@@ -10,7 +10,10 @@ module.exports = (err, req, res, next) => {
 		return res.status(statusCode).json({
 			status: status,
 			data: {
-				err,
+				error: {
+					message: err.message,
+					...err,
+				},
 			},
 		});
 	}

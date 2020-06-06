@@ -61,10 +61,17 @@ userSchema.pre("save", async function (next) {
 	}
 
 	this.password = await bcrypt.hash(this.password, 12);
-
 	this.passwordConfirm = undefined;
 	next();
 });
+
+// 2. Instance method for comparing passwords
+userSchema.methods.comparePassword = async function (
+	candidatePassword,
+	hashedPassword
+) {
+	return await bcrypt.compare(candidatePassword, hashedPassword);
+};
 
 const User = mongoose.model("User", userSchema);
 

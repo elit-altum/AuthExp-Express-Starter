@@ -40,9 +40,30 @@ exports.signupUser = catchAsync(async (req, res) => {
 		passwordConfirm,
 	});
 
-	user.password = undefined;
-
 	generateJWT(user, res);
 });
 
 // 2. LOGIN EXISTING USER
+exports.loginUser = catchAsync(async (req, res) => {
+	const { username, password } = req.body;
+
+	if (!username || !password) {
+		throw new AppError("Please provide username and password!", 400);
+	}
+
+	const tempUser = await User.findOne({ username }).select("+password");
+
+	if (!tempUser) {
+		throw new AppError("Invalid username or password.", 400);
+	}
+
+	const isMatch = await tempUser.comparePassword(password, tempUser.password);
+	console.log(isMatch);
+
+	if (!isMatch) {
+		throw new AppError("Invalid username or password.", 400);
+	}
+
+	tempUser.password = undefined;
+	generateJWT(tempUser, res);
+});
