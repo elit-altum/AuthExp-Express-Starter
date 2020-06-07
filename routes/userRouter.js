@@ -20,10 +20,21 @@ router.get(
 router.post("/forgotPassword", authController.generateResetToken);
 router.patch("/resetPassword/:token", authController.resetPassword);
 
-// *? 3. UPDATE USER DETAILS (protected routes)
+// *? PROTECTED ROUTES
 router.use(authController.protectRoute);
+
+// *? 3. UPDATE USER DETAILS
+router.get("/me", userController.getMe);
 
 router.patch("/updateMe", userController.updateMe);
 router.patch("/updatePassword", userController.updatePassword);
+
+router.delete("/deleteMe", userController.deactivateUser);
+
+// *? ADMIN ONLY ROUTES
+router.use(authController.restrictTo("admin"));
+
+// *? DELETE USER FROM DB
+router.delete("/deleteUser/:userId", userController.deleteUser);
 
 module.exports = router;

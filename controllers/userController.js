@@ -2,6 +2,7 @@
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const sendEmail = require("../utils/sendEmails");
 
 // ! ALL ROUTES HERE MUST BE PROTECTED BY authController.protectRoute()
 
@@ -20,7 +21,19 @@ const getSpecifics = (req, ...props) => {
 	return finalObj;
 };
 
-// *? 1. UPDATE USER DETAILS (insensitive)
+// *? 1. GET USER DETAILS
+exports.getMe = catchAsync(async (req, res) => {
+	const user = await User.findById(req.user.id).select("-__v");
+
+	res.status(200).json({
+		status: "success",
+		data: {
+			user,
+		},
+	});
+});
+
+// *? 2. UPDATE USER DETAILS (insensitive)
 exports.updateMe = catchAsync(async (req, res) => {
 	if (req.body.password) {
 		throw new AppError(
@@ -44,7 +57,7 @@ exports.updateMe = catchAsync(async (req, res) => {
 	});
 });
 
-// *? 2. UPDATE USER PASSWORD
+// *? 3. UPDATE USER PASSWORD
 exports.updatePassword = catchAsync(async (req, res) => {
 	const { oldPassword, newPassword, confirmPassword } = req.body;
 
@@ -74,5 +87,36 @@ exports.updatePassword = catchAsync(async (req, res) => {
 	res.status(200).json({
 		status: "success",
 		message: "Password changed successfully.",
+	});
+});
+
+// *? 4. DELETE USER (deactivate account)
+exports.deactivateUser = catchAsync(async (req, res) => {
+	const user = await User.findByIdAndUpdate(req.user.id, {
+		isActive: false,
+	});
+
+	const deactivateHtml = `Sorry to see you go @${user.username}. You can reclaim access to your account by logging in again later. We hope to see you back soon.`;
+	sendEmail({
+		to: `${user.email}`,
+		subject: "Sorry to see you go :(",
+		html: deactivateHtml,
+	});
+
+	res.status(204).json({
+		status: "success",
+	});
+});
+
+// *? 5. DELETE USER FROM DB (admin only)
+exports.deleteUser = catchAsync(async (req, res) => {
+	const user = await User.findByIdAndRemove(req.params.userId);
+
+	if (!user) {
+		throw new AppError("No user found with this id.", 404);
+	}
+
+	res.status(204).json({
+		status: "success",
 	});
 });
