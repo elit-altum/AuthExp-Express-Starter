@@ -44,8 +44,11 @@ exports.signupUser = catchAsync(async (req, res) => {
 		passwordConfirm,
 	});
 
+	// Censor sensitive data
 	user.password = undefined;
 	user.passwordChangedAt = undefined;
+	user._id = undefined;
+	user.__v = undefined;
 
 	sendEmail({
 		to: email,

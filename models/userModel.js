@@ -5,62 +5,73 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
 
-const userSchema = new mongoose.Schema({
-	username: {
-		type: String,
-		required: true,
-		unique: [true, "This username is already taken!"],
-		lowercase: true,
-	},
-	name: {
-		type: String,
-	},
-	email: {
-		type: String,
-		required: true,
-		unique: [true, "This email id is already in use. Please try to login."],
-		validate: [(val) => validator.isEmail(val)],
-	},
-	password: {
-		type: String,
-		required: true,
-		minlength: 8,
-		select: false,
-	},
-	passwordConfirm: {
-		type: String,
-		required: true,
-		minlength: 8,
-		validate: {
-			validator: function (val) {
-				return this.password === val;
+const userSchema = new mongoose.Schema(
+	{
+		username: {
+			type: String,
+			required: true,
+			unique: [true, "This username is already taken!"],
+			lowercase: true,
+		},
+		name: {
+			type: String,
+		},
+		email: {
+			type: String,
+			required: true,
+			unique: [true, "This email id is already in use. Please try to login."],
+			validate: [(val) => validator.isEmail(val)],
+		},
+		photo: {
+			type: String,
+			default: "/img/user-profiles/default.png",
+		},
+		password: {
+			type: String,
+			required: true,
+			minlength: 8,
+			select: false,
+		},
+		passwordConfirm: {
+			type: String,
+			required: true,
+			minlength: 8,
+			validate: {
+				validator: function (val) {
+					return this.password === val;
+				},
+				message: "Provided passwords do not match. Please try again",
 			},
-			message: "Provided passwords do not match. Please try again",
+		},
+		passwordChangedAt: {
+			type: Date,
+			default: Date.now(),
+			select: false,
+		},
+		passwordResetToken: {
+			type: String,
+			select: false,
+		},
+		passwordResetValidity: {
+			type: Date,
+			select: false,
+		},
+		role: {
+			type: String,
+			enum: ["admin", "user"],
+			default: "user",
+		},
+		isActive: {
+			type: Boolean,
+			default: true,
 		},
 	},
-	passwordChangedAt: {
-		type: Date,
-		default: Date.now(),
-		select: false,
-	},
-	passwordResetToken: {
-		type: String,
-		select: false,
-	},
-	passwordResetValidity: {
-		type: Date,
-		select: false,
-	},
-	role: {
-		type: String,
-		enum: ["admin", "user"],
-		default: "user",
-	},
-	isActive: {
-		type: Boolean,
-		default: true,
-	},
-});
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true },
+	}
+);
 
 // 1. Document middleware to hash the password before save
 userSchema.pre("save", async function (next) {

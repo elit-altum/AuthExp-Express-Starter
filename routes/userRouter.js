@@ -13,7 +13,8 @@ router.get("/logout", authController.logoutUser);
 router.get(
 	"/check",
 	authController.protectRoute,
-	authController.restrictTo("user")
+	authController.restrictTo("user"),
+	(req, res) => res.send("done")
 );
 
 // *? 2. FORGOT AND RESET PASSWORD
@@ -26,7 +27,12 @@ router.use(authController.protectRoute);
 // *? 3. UPDATE USER DETAILS
 router.get("/me", userController.getMe);
 
-router.patch("/updateMe", userController.updateMe);
+router.patch(
+	"/updateMe",
+	userController.uploadUserProfile,
+	userController.resizeUserImage,
+	userController.updateMe
+);
 router.patch("/updatePassword", userController.updatePassword);
 
 router.delete("/deleteMe", userController.deactivateUser);

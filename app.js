@@ -2,6 +2,8 @@ require("dotenv").config({
 	path: "config.env",
 });
 
+const path = require("path");
+
 const express = require("express");
 const mongoose = require("mongoose");
 
@@ -47,6 +49,9 @@ app.set("trust proxy", 1);
 // Parse request body
 app.use(express.json());
 
+// For static files
+app.use(express.static(path.join(__dirname, "public")));
+
 // Parse cookies
 app.use(cookieParser());
 
@@ -54,7 +59,7 @@ app.use(cookieParser());
 app.use(xss());
 
 // Sanitize mongo NoSQL queries
-app.use(mongoSanitize);
+app.use(mongoSanitize());
 
 // General security headers
 app.use(helmet());

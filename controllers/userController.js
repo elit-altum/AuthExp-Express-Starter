@@ -1,4 +1,11 @@
 // Handles user specific routes
+const fs = require("fs");
+const { promisify } = require("util");
+const path = require("path");
+
+const multer = require("multer");
+const sharp = require("sharp");
+
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
@@ -43,6 +50,16 @@ exports.updateMe = catchAsync(async (req, res) => {
 	}
 
 	const santisedObject = getSpecifics(req, "email", "name", "username");
+
+	if (req.file.filename) {
+		santisedObject.photo = `/img/user-profiles/${req.file.filename}`;
+
+		// Delete existing photo
+		const imageName = req.user.photo.split("/")[3];
+		if (imageName != "default.png") {
+			await deleteProfilePhoto(imageName);
+		}
+	}
 
 	const user = await User.findByIdAndUpdate(req.user.id, santisedObject, {
 		runValidators: true,
@@ -112,6 +129,12 @@ exports.deactivateUser = catchAsync(async (req, res) => {
 exports.deleteUser = catchAsync(async (req, res) => {
 	const user = await User.findByIdAndRemove(req.params.userId);
 
+	// Delete the user profile image
+	const imageName = req.user.photo.split("/")[3];
+	if (imageName != "default.png") {
+		await deleteProfilePhoto(imageName);
+	}
+
 	if (!user) {
 		throw new AppError("No user found with this id.", 404);
 	}
@@ -120,3 +143,61 @@ exports.deleteUser = catchAsync(async (req, res) => {
 		status: "success",
 	});
 });
+
+// *? <--------------- USER PROFILE IMAGES ----------------->
+
+// *? 0. UTILITY FUNCTIONS FOR IMAGES
+
+// ** a. Setup multer for image and files handling
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+	if (file.mimetype.startsWith("image")) {
+		cb(null, true);
+	} else {
+		cb(new AppError("Please upload images only.", 400), false);
+	}
+};
+
+const upload = multer({
+	storage: multerStorage,
+	fileFilter: multerFilter,
+	limits: {
+		fileSize: 5000000, // 5MB
+	},
+});
+
+// * b. MIDDLEWARE : Multer for image handling
+exports.uploadUserProfile = upload.single("photo");
+
+// * c. MIDDLEWARE: Sharp for image processing and storing
+exports.resizeUserImage = async (req, res, next) => {
+	if (!req.file) {
+		next();
+	}
+	req.file.filename = `user-${req.user.id}-${new Date(
+		Date.now()
+	).getTime()}.jpg`;
+
+	await sharp(req.file.buffer)
+		.resize(500, 500)
+		.toFormat("jpeg")
+		.jpeg({ quality: 90 })
+		.toFile(`public/img/user-profiles/${req.file.filename}`);
+
+	next();
+};
+
+// * d. Delete old profile picture from server
+const deleteProfilePhoto = async (imageName) => {
+	const deletePath = path.join(
+		__dirname,
+		"..",
+		"public",
+		"img",
+		"user-profiles",
+		imageName
+	);
+
+	await promisify(fs.unlink)(deletePath);
+};
