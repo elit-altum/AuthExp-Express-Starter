@@ -61,21 +61,30 @@ exports.signupUser = catchAsync(async (req, res) => {
 exports.loginUser = catchAsync(async (req, res) => {
 	const { username, password } = req.body;
 
+	// A. If username and password exist in request
 	if (!username || !password) {
 		throw new AppError("Please provide username and password!", 400);
 	}
 
+	// B. Get user based on username
 	const tempUser = await User.findOne({ username }).select("+password");
 
 	if (!tempUser) {
 		throw new AppError("Invalid username or password.", 400);
 	}
 
+	// C. Check if user password matches stored password
 	const isMatch = await tempUser.comparePassword(password, tempUser.password);
 
 	if (!isMatch) {
 		throw new AppError("Invalid username or password.", 400);
 	}
+
+	// D. If user deactivated, mark him as active again
+	tempUser.isActive = true;
+	await tempUser.save({
+		validateBeforeSave: false,
+	});
 
 	tempUser.password = undefined;
 	generateJWT(tempUser, res);
@@ -152,7 +161,7 @@ exports.restrictTo = (...roles) => {
 	});
 };
 
-// *? 6. PASSWORD RESET
+// *? 6. PASSWORD FORGOT & RESET
 
 // * 6a. Generate Reset Email
 exports.generateResetToken = catchAsync(async (req, res) => {
@@ -194,7 +203,7 @@ exports.generateResetToken = catchAsync(async (req, res) => {
 	});
 });
 
-// * 6a. Reset new password
+// * 6b. Reset new password
 exports.resetPassword = catchAsync(async (req, res) => {
 	const token = req.params.token;
 
