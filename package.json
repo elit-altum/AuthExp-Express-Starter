@@ -14,13 +14,17 @@
 	"dependencies": {
 		"@sendgrid/mail": "^7.1.1",
 		"bcryptjs": "^2.4.3",
+		"compression": "^1.7.4",
 		"cookie-parser": "^1.4.5",
 		"dotenv": "^8.2.0",
 		"express": "^4.17.1",
+		"express-mongo-sanitize": "^2.0.0",
+		"helmet": "^3.22.0",
 		"jsonwebtoken": "^8.5.1",
 		"mongoose": "^5.9.18",
 		"morgan": "^1.10.0",
-		"validator": "^13.0.0"
+		"validator": "^13.0.0",
+		"xss-clean": "^0.1.1"
 	},
 	"devDependencies": {
 		"nodemon": "^2.0.4"
