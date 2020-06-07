@@ -1,10 +1,12 @@
 // Handles user and authentication functions
 const { promisify } = require("util");
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const sendEmail = require("../utils/sendEmails");
 
 // *? 0. GENERATE JWT
 const generateJWT = (user, res) => {
@@ -43,6 +45,15 @@ exports.signupUser = catchAsync(async (req, res) => {
 	});
 
 	user.password = undefined;
+	user.passwordChangedAt = undefined;
+
+	sendEmail({
+		to: email,
+		subject: `Welcome to the ${process.env.APP_NAME} family!`,
+		html:
+			"We are so glad to have you here! Let's do some exciting things together.",
+	});
+
 	generateJWT(user, res);
 });
 
@@ -61,7 +72,6 @@ exports.loginUser = catchAsync(async (req, res) => {
 	}
 
 	const isMatch = await tempUser.comparePassword(password, tempUser.password);
-	console.log(isMatch);
 
 	if (!isMatch) {
 		throw new AppError("Invalid username or password.", 400);
@@ -145,4 +155,75 @@ exports.restrictTo = (...roles) => {
 // *? 6. PASSWORD RESET
 
 // * 6a. Generate Reset Email
-exports.generateResetToken = catchAsync(async (req, res) => {});
+exports.generateResetToken = catchAsync(async (req, res) => {
+	const { email } = req.body;
+
+	// If no email in request
+	if (!email) {
+		throw new AppError("Please provide a registered email id.", 400);
+	}
+
+	const foundUser = await User.findOne({ email }).select("+passwordResetToken");
+
+	// If email not registered for a user
+	if (!foundUser) {
+		throw new AppError(
+			"No existing user found with this email id. Please signup if you are new.",
+			400
+		);
+	}
+
+	// Get reset token
+	const resetToken = foundUser.generateResetToken();
+	foundUser.save({ validateBeforeSave: false });
+
+	// Generate email for reset
+	const fullUrl = req.protocol + "://" + req.get("host");
+	const resetEmailHtml = `We have received a password reset request from this email id. Please use this link to provide a new password. 
+	<br> <a target="_blank" href="${fullUrl}/api/v1/users/resetPassword/${resetToken}">Reset Password</a>`;
+
+	sendEmail({
+		to: `${foundUser.email}`,
+		subject: "Password reset request (expires in 15 minutes)",
+		html: resetEmailHtml,
+	});
+
+	res.status(200).json({
+		status: "success",
+		message: `An email with password reset instructions has been sent to ${foundUser.email}`,
+	});
+});
+
+// * 6a. Reset new password
+exports.resetPassword = catchAsync(async (req, res) => {
+	const token = req.params.token;
+
+	const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+	// Find user with same and unexpired token and
+	const user = await User.findOne({
+		passwordResetToken: hashedToken,
+		passwordResetValidity: { $gte: Date.now() },
+	});
+
+	if (!user) {
+		throw new AppError(
+			"This token is not valid or has expired. Please try again",
+			401
+		);
+	}
+
+	// Update user details and password
+	user.password = req.body.password;
+	user.passwordConfirm = req.body.passwordConfirm;
+	user.passwordChangedAt = Date.now();
+
+	user.passwordResetToken = undefined;
+	user.passwordResetValidity = undefined;
+
+	await user.save();
+
+	user.password = undefined;
+	user.passwordChangedAt = undefined;
+	generateJWT(user, res);
+});

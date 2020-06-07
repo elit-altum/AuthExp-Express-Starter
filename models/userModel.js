@@ -1,4 +1,6 @@
 // User schema/model
+const crypto = require("crypto");
+
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
@@ -46,6 +48,10 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		select: false,
 	},
+	passwordResetValidity: {
+		type: Date,
+		select: false,
+	},
 	role: {
 		type: String,
 		enum: ["admin", "user"],
@@ -74,6 +80,20 @@ userSchema.methods.comparePassword = async function (
 	hashedPassword
 ) {
 	return await bcrypt.compare(candidatePassword, hashedPassword);
+};
+
+// 3. Instance method for generating reset tokens
+userSchema.methods.generateResetToken = function () {
+	const plainResetToken = crypto.randomBytes(32).toString("hex");
+
+	this.passwordResetToken = crypto
+		.createHash("sha256")
+		.update(plainResetToken)
+		.digest("hex");
+
+	this.passwordResetValidity = new Date(Date.now() + 15 * 60 * 1000);
+
+	return plainResetToken;
 };
 
 const User = mongoose.model("User", userSchema);
