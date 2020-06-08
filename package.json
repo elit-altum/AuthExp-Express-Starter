@@ -1,5 +1,5 @@
 {
-	"name": "Insta-Clone-RestAPI",
+	"name": "express-starter-with-user-auth",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
@@ -9,7 +9,7 @@
 		"start": "node server.js"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "elit-altum",
 	"license": "ISC",
 	"dependencies": {
 		"@sendgrid/mail": "^7.1.1",
