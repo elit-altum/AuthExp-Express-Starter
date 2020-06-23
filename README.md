@@ -1,8 +1,4 @@
-# Express Starter With User Authentication
-
-***A simple, intuitive and ready to use MVC express starter with user authentication handled for you.***
-
-*Highly customizable to suit your needs. Can be extended to a REST API or to a full fledged server/client side rendering webapp.*
+# Express Starter With User Authentication 🔐
 
 <p>
   <img src="https://img.shields.io/badge/backend-NodeJS-darkgreen?style=flat&logo=Node.js" />
@@ -17,7 +13,28 @@
   <img src="https://img.shields.io/badge/made--by-elit--altum-blue?style=flat" />
 </p>
 
-## 01. BASICS
+***✔️ A simple, intuitive and ready to use MVC express starter with user authentication handled for you.***
+
+*✔️ Highly customizable to suit your needs. Can be extended to a REST API or to a full fledged server/client side rendering webapp.*
+
+## 00. CONTENTS 📃
+  - [BASICS](#01-basics-⚙️)
+  - [SETUP](#02-setup-🏗️)
+  - [AUTHENTICATION MIDDLEWARES](#03-authentication-middlewares-🔑)
+  - [API DOCUMENTATION](#04-api-documentation-📝)
+    - [Basics](#a-basics)
+    - [User Signup](#b-user-signup)
+    - [User Login](#c-user-login)
+    - [User Logout](#d-user-logout)
+    - [Forgot Password](#e-forgot-password)
+    - [Reset Password](#f-reset-password)
+    - [User Details](#g-user-details)
+    - [Update User](#h-update-user)
+    - [Update Password](#i-update-password)
+    - [Delete/Deactivate User](#j-deletedeactivate-user)
+    - [Delete User](#k-delete-user)
+
+## 01. BASICS ⚙️
 1. The MVC architecture splits your application files broadly into 3 components - Models, Views and Controllers.
     - Models: The database schemas or guidelines which control the data being stored in the database. It is responsible for data validations.
     - Controllers: This part of the application can be split into routes and controllers.
@@ -51,7 +68,7 @@
     | server.js
     ```
 
-## 02. SETUP
+## 02. SETUP 🏗️
 
 1. Create a file ```config.env``` at the root of the directory to store all the secrets or environment variables. [dotenv](https://www.npmjs.com/package/dotenv) is being used to parse these environment variables.
    ```
@@ -85,24 +102,55 @@
     - ```npm run dev``` : Starts the server on the specified port using [nodemon](https://www.npmjs.com/package/nodemon). Every save will refresh the server.
     - ```npm start``` : A script which runs the app in production using node. Mostly used for heroku or other hosting platforms after being built there to start the server.
 
-## 03. API DOCUMENTATION
+## 03. AUTHENTICATION MIDDLEWARES 🔑
+Two very important and versatile middlewares have been provided in ```authController.js``` to implement user authentication and authorization for any future endpoints.
+
+  1. User Authentication 
+       - To only allow authenticated users to access some endpoints please import and use ```protectRoute``` from ```authController.js``` before the actual endpoint. If a user is not validated a ```401 - Unauthorized``` error is returned.<br/>
+       Snippet:
+          ```JS
+          const authController = require('../controllers/authController.js')
+
+          app.use(authController.protectRoute)
+
+          // All routes herein are now protected
+          
+          app.get('/protectedRoute', (req, res) => {
+            // Controller Logic
+          });
+          ``` 
+
+  2. User Authorization 
+      - To only allow admins to access some endpoints please import and use ```restrictTo``` from ```authController.js``` before the actual endpoint. If a user is not validated a ```403 - Forbidden``` error is returned.
+      - Pass the roles which you want to allow to access the endpoint as the argument to this function. Role of a user is specified in his database document as the ```role``` property.
+      - **NOTE**: Only use this middleware *after* the ```protectRoute```.<br/> 
+      Snippet:  
+        ```JS
+        const authController = require('../controllers/authController.js')
+
+        app.use(authController.protectRoute)
+        app.use(authController.restrictTo('admin'))
+
+        // All routes herein are now protected and can only be accessed by admins.
+        
+        app.get('/adminRoute', (req, res) => {
+          // Controller Logic
+        });
+        ``` 
+
+## 04. API DOCUMENTATION 📝
 
 ### A. Basics
-1. Routes are of two types Protected and Open.
-   - Protected: These routes require a valid server issued JWT either as a request header or a cookie sent along with the request. The request header should have the format:
+1. Routes are of two types ***Protected*** and ***Open***.
+   - **Protected**: These routes require a valid server issued JWT either as a request header or a cookie sent along with the request. The request header should have the format:
       ```
       {
         Authorization: Bearer <JWT>
       }
       ```
-    - Open: These routes can be accessed by both authenticated and non authenticated users and do not require any special configuration.
-
-2. Notations:
-   - Fields marked * are compulsory and should be provided for a successful request.
+    - **Open**: These routes can be accessed by both authenticated and non authenticated users and do not require any special configuration.
+2. Every user can be specified some roles, they can be either ```admin``` or ```user```. By default every user document will have the role of ```user```. For creating an admin, please change their ```role``` on the database document itself.
   
-[User Signup](#b.-user-signup)
-
-
 ### B. User Signup
 *Open Route*
 
@@ -113,11 +161,11 @@ POST */api/v1/users/signup*
 **Request**
 ```json
 {
-	"username": "my-username", *
+	"username": "my-username", 
 	"name": "my-name", 
-	"password": "my-password", *
-	"passwordConfirm": "my-password", *
-	"email": "my-name@domain.com" *
+	"password": "my-password", 
+	"passwordConfirm": "my-password", 
+	"email": "my-name@domain.com" 
 }
 ```
 
@@ -170,8 +218,8 @@ POST */api/v1/users/login*
 **Request**
 ```json
 {
-	"username": "my-username", *
-	"password": "my-password", *
+	"username": "my-username", 
+	"password": "my-password", 
 }
 ```
 
@@ -235,7 +283,7 @@ POST */api/v1/users/forgotPassword*
 **Request**
 ```json
 {
-	"email": "my-name@domain.com" *
+	"email": "my-name@domain.com" 
 }
 ```
 
@@ -284,14 +332,14 @@ PATCH */api/v1/users/resetPassword/some-token*
             "photo": "/img/user-profiles/default.png",
             "role": "user",
             "isActive": true,
-            "_id": "5ef1fda5f6b4030dc0a258c4",
-            "username": "my-username2",
+            "_id": "5ef1c77cf6b4030dc0a258c3",
+            "username": "my-username",
             "name": "my-name",
-            "email": "manan.sharma311@gmail.com",
+            "email": "my-name@domain.com",
             "createdAt": "2020-06-23T13:03:33.737Z",
             "updatedAt": "2020-06-23T13:12:23.286Z",
             "__v": 0,
-            "id": "5ef1fda5f6b4030dc0a258c4"
+            "id": "5ef1c77cf6b4030dc0a258c3"
         }
     }
 }
@@ -332,5 +380,120 @@ GET */api/v1/users/me*
     }
 }
 ```
-    
+
+### H. Update User
+*Protected Route*
+
+PATCH */api/v1/users/updateMe*
+
+- Update the current user details (non-sensitive details only)
+- Do not use this route for updating passwords. 
+  
+**Request**
+
+ Multi-part/Form data consisting of: 
+
+```
+{
+  name: String,
+  username: String,
+  email: String,
+  photo: File (images/*)
+}
+```
+
+**Response**
+
+Updated data is sent as the server response:
+```json
+{
+    "status": "success",
+    "data": {
+        "user": {
+            "photo": "/img/user-profiles/default.png",
+            "role": "user",
+            "isActive": true,
+            "_id": "5ef1c77cf6b4030dc0a258c3",
+            "username": "my-username2",
+            "name": "my-name",
+            "email": "my-name@domain.com",
+            "createdAt": "2020-06-23T13:03:33.737Z",
+            "updatedAt": "2020-06-23T13:12:23.286Z",
+            "__v": 0,
+            "id": "5ef1c77cf6b4030dc0a258c3"
+        }
+    }
+}
+```
+
+**Notes**
+  1. Validators: 
+     - Same as [User Signup](#b.-user-signup)
+  2. Result
+      - This operation will return an error if an attempt is made to update the password using this route.
+      - The photo to be uploaded should satisfy:
+        - MIME: ```images/*```
+        - File Size: Not more than 5MB
+        - The dimensions of the photo will be cropped to ```500x500``` from the center before uploading.
+  
+### I. Update Password
+*Protected Route*
+
+PATCH */api/v1/users/updatePassword*
+
+- Update the current user password.
+  
+**Request**
+```json
+{
+	"oldPassword": "my-password",
+	"newPassword": "new-password",
+	"confirmPassword": "new-password"
+}
+```
+
+**Response**
+```json
+{
+    "status": "success",
+    "message": "Password changed successfully."
+}
+```
+
+**Notes**
+  1. Validators: 
+     - Same as [Reset Password](#f.-reset-password)
+     - The oldPassword field should have the current user password before updating it to ensure no one else can change the password.
+  2. Result
+      - **NOTE**: This operation will make all other JWTs issued to this user as invalid. The user would have to login again with the new credentials.
+  
+### J. Delete/Deactivate User
+*Protected Route*
+
+DELETE */api/v1/users/deleteMe*
+
+- Allow a user to delete themselves from the database.
+- A pseudo operation. This operation only sets a user's ```isActive``` field as ```false```.
+  
+**Response**
+- A ```204``` status code.
+
+**Notes**
+  1. Result
+      - **NOTE**: This operation will just mark the user as inactive. If you wish to delete a user from the database, either modify this operation or use [Delete User](#k.-delete-user)
+
+### K. Delete User
+*Protected Route*
+<br/>
+*Admin Only*
+
+DELETE */api/v1/users/deleteUser/user-id*
+
+- Actually deletes the user document from the database.
+  
+**Response**
+- A ```204``` status code.
+
+
+
 
