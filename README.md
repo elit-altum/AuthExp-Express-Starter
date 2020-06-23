@@ -86,3 +86,251 @@
     - ```npm start``` : A script which runs the app in production using node. Mostly used for heroku or other hosting platforms after being built there to start the server.
 
 ## 03. API DOCUMENTATION
+
+### A. Basics
+1. Routes are of two types Protected and Open.
+   - Protected: These routes require a valid server issued JWT either as a request header or a cookie sent along with the request. The request header should have the format:
+    ```
+    {
+      Authorization: Bearer <JWT>
+    }
+    ```
+    - Open: These routes can be accessed by both authenticated and non authenticated users and do not require any special configuration.
+
+2. Notations:
+   - Fields marked ✔️ are compulsory and should be provided for a successful request.
+  
+[User Signup](#b.-user-signup)
+
+
+### B. User Signup
+*Open Route*
+
+POST */api/v1/users/signup*
+
+- Sign up new users for the application and store relevant information in the database.
+  
+**Request**
+```json
+{
+	"username": "my-username", ✔️
+	"name": "my-name", 
+	"password": "my-password", ✔️
+	"passwordConfirm": "my-password", ✔️
+	"email": "my-name@domain.com" ✔️
+}
+```
+
+**Response**
+```json
+{
+    "status": "success",
+    "data": {
+        "token": "<Server issued JWT>",
+        "user": {
+            "photo": "/img/user-profiles/default.png",
+            "role": "user",
+            "isActive": true,
+            "_id": "5ef1c77cf6b4030dc0a258c3",
+            "username": "my-username",
+            "name": "my-name",
+            "email": "my-name@domain.com",
+            "createdAt": "2020-06-23T09:12:28.107Z",
+            "updatedAt": "2020-06-23T09:12:28.107Z",
+            "__v": 0,
+            "id": "5ef1c77cf6b4030dc0a258c3"
+        }
+    }
+}
+```
+
+**Notes**
+  1. Validators: 
+     - Username: Should be unique in the database.
+     - Email: Should be unique in the database. It should comply with the format ```some@domain.com```
+     - Password: Minimum length of 8 characters.
+     - PasswordConfirm: Minimum length of 8 characters and should be same as Password.
+  2. Result
+     - Upon validation, a server issued JWT will be returned in plain text as well as a cookie along with the server response. The cookie is automatically stored in the browser and the plain text JWT maybe used for setting future request headers for authentication.
+     - A welcome email would be sent to the registered email id via SendGrid.
+     - The ```photo``` property in the response holds a relative URL to the ```default.png``` user profile in the server. This can be directly used as
+        ```html
+        <img src={res.data.user.photo} />
+        OR
+        <img src="/img/user-profiles/default.png">
+        ```
+
+### C. User Login
+*Open Route*
+
+POST */api/v1/users/login*
+
+- Login existing users by username and password and issue a JWT. 
+  
+**Request**
+```json
+{
+	"username": "my-username", ✔️
+	"password": "my-password", ✔️
+}
+```
+
+**Response**
+```json
+{
+    "status": "success",
+    "data": {
+        "token": "<Server issued JWT>",
+        "user": {
+            "photo": "/img/user-profiles/default.png",
+            "role": "user",
+            "isActive": true,
+            "_id": "5ef1c77cf6b4030dc0a258c3",
+            "username": "my-username",
+            "name": "my-name",
+            "email": "my-name@domain.com",
+            "createdAt": "2020-06-23T09:12:28.107Z",
+            "updatedAt": "2020-06-23T09:12:28.107Z",
+            "__v": 0,
+            "id": "5ef1c77cf6b4030dc0a258c3"
+        }
+    }
+}
+```
+
+**Notes**
+  1. Validators: 
+     - Username and Password should match correctly with the stored document in the database.
+  2. Result
+      - Upon validation, a server issued JWT will be returned in plain text as well as a cookie along with the server response. The cookie is automatically stored in the browser and the plain text JWT maybe used for setting future request headers for authentication.
+
+### D. User Logout
+*Protected Route*
+
+GET */api/v1/users/logout*
+
+- Logout users from the application and replace their JWTs for no further access to protected routes. 
+
+**Response**
+```json
+{
+    "status": "success"
+}
+```
+
+**Notes**
+  1. Validators: 
+     - Can only be performed if the client is authenticated.
+  2. Result
+     - Upon validation, the server issued JWT stored as a cookie will be replaced by some garbage text. This cookie will then expire in 5 seconds.
+     - User would have to login again to access any protected routes.
+
+### E. Forgot Password
+*Open Route*
+
+POST */api/v1/users/forgotPassword*
+
+- Send an email with password reset details to a registered email id. 
+  
+**Request**
+```json
+{
+	"email": "my-name@domain.com" ✔️
+}
+```
+
+**Response**
+```json
+{
+    "status": "success",
+    "message": "An email with password reset instructions has been sent to my-name@domain.com"
+}
+```
+
+**Notes**
+  1. Validators: 
+     - The email should comply with the format ```some@domain.com``` and should be registered by a user in the database.
+  2. Result
+      - Upon validation, a server issued token for resetting password will be sent to the specified email. Example: 
+        > We have received a password reset request from this email id. Please use this link to provide a new password.
+        *Reset Password*
+
+      - The 'Reset Password' will link to a url of the form: <br/>
+       ```http://<app-url>/api/v1/users/resetPassword/<some-token>```
+      - The URL will only be valid for 15 minutes after its creation.
+
+### F. Reset Password
+*Open Route*
+
+PATCH */api/v1/users/resetPassword/some-token*
+
+- Reset your password, if forgotten, by using this generated link sent to your email id. 
+  
+**Request**
+```json
+{
+	"password": "new-password",
+	"passwordConfirm": "new-password"
+}
+```
+
+**Response**
+```json
+{
+    "status": "success",
+    "data": {
+        "token": "<Server issued JWT>",
+        "user": {
+            "photo": "/img/user-profiles/default.png",
+            "role": "user",
+            "isActive": true,
+            "_id": "5ef1fda5f6b4030dc0a258c4",
+            "username": "my-username2",
+            "name": "my-name",
+            "email": "manan.sharma311@gmail.com",
+            "createdAt": "2020-06-23T13:03:33.737Z",
+            "updatedAt": "2020-06-23T13:12:23.286Z",
+            "__v": 0,
+            "id": "5ef1fda5f6b4030dc0a258c4"
+        }
+    }
+}
+```
+
+**Notes**
+  1. Validators: 
+     - The password should have at least 8 characters and match perfectly with passwordConfirm.
+  2. Result
+      - Upon validation, a server issued JWT will be returned in plain text as well as a cookie along with the server response. The cookie is automatically stored in the browser and the plain text JWT maybe used for setting future request headers for authentication. 
+      - **NOTE**: This operation will make all other JWTs issued to this user as invalid. The user would have to login again with the new credentials.
+
+
+### G. User Details
+*Protected Route*
+
+GET */api/v1/users/me*
+
+- Shows the details of the current user. 
+
+**Response**
+```json
+{
+    "status": "success",
+    "data": {
+        "user": {
+            "photo": "/img/user-profiles/default.png",
+            "role": "user",
+            "isActive": true,
+            "_id": "5ef1c77cf6b4030dc0a258c3",
+            "username": "my-username",
+            "name": "my-name",
+            "email": "my-name@domain.com",
+            "createdAt": "2020-06-23T09:12:28.107Z",
+            "updatedAt": "2020-06-23T09:12:28.107Z",
+            "id": "5ef1c77cf6b4030dc0a258c3"
+        }
+    }
+}
+```
+    
+
