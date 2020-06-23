@@ -90,15 +90,15 @@
 ### A. Basics
 1. Routes are of two types Protected and Open.
    - Protected: These routes require a valid server issued JWT either as a request header or a cookie sent along with the request. The request header should have the format:
-    ```
-    {
-      Authorization: Bearer <JWT>
-    }
-    ```
+      ```
+      {
+        Authorization: Bearer <JWT>
+      }
+      ```
     - Open: These routes can be accessed by both authenticated and non authenticated users and do not require any special configuration.
 
 2. Notations:
-   - Fields marked ✔️ are compulsory and should be provided for a successful request.
+   - Fields marked * are compulsory and should be provided for a successful request.
   
 [User Signup](#b.-user-signup)
 
@@ -113,11 +113,11 @@ POST */api/v1/users/signup*
 **Request**
 ```json
 {
-	"username": "my-username", ✔️
+	"username": "my-username", *
 	"name": "my-name", 
-	"password": "my-password", ✔️
-	"passwordConfirm": "my-password", ✔️
-	"email": "my-name@domain.com" ✔️
+	"password": "my-password", *
+	"passwordConfirm": "my-password", *
+	"email": "my-name@domain.com" *
 }
 ```
 
@@ -170,8 +170,8 @@ POST */api/v1/users/login*
 **Request**
 ```json
 {
-	"username": "my-username", ✔️
-	"password": "my-password", ✔️
+	"username": "my-username", *
+	"password": "my-password", *
 }
 ```
 
@@ -235,7 +235,7 @@ POST */api/v1/users/forgotPassword*
 **Request**
 ```json
 {
-	"email": "my-name@domain.com" ✔️
+	"email": "my-name@domain.com" *
 }
 ```
 
