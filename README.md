@@ -18,10 +18,10 @@
 *✔️ Highly customizable to suit your needs. Can be extended to a REST API or to a full fledged server/client side rendering webapp.*
 
 ## 00. CONTENTS 📃
-  - [BASICS](#01-basics-⚙️)
-  - [SETUP](#02-setup-🏗️)
-  - [AUTHENTICATION MIDDLEWARES](#03-authentication-middlewares-🔑)
-  - [API DOCUMENTATION](#04-api-documentation-📝)
+  - [BASICS](#01-basics-%EF%B8%8F)
+  - [SETUP](#02-setup-%EF%B8%8F)
+  - [AUTHENTICATION MIDDLEWARES](#03-authentication-middlewares-)
+  - [API DOCUMENTATION](#04-api-documentation-)
     - [Basics](#a-basics)
     - [User Signup](#b-user-signup)
     - [User Login](#c-user-login)
