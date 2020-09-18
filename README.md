@@ -1,4 +1,4 @@
-# AuthOr - Express Starter App With Built-In User Authentication 🔐
+# AuthExp 🔐
 
 <p align="center">
   <img src="https://img.shields.io/badge/backend-NodeJS-darkgreen?style=flat&logo=Node.js" />
@@ -6,6 +6,10 @@
   <img src="https://img.shields.io/badge/authentication-JSON Web Tokens-purple?logo=json-web-tokens" />
   <img src="https://img.shields.io/badge/database-MongoDB-yellow?logo=MongoDB" />
   <img src="https://img.shields.io/badge/architecture-MVC-red" />
+</p>
+
+<p align="center">
+  <img src="./assets/authexp_logo.png">
 </p>
 
 ***✔️ A simple, intuitive and ready to use MVC express starter with user authentication handled for you.***
@@ -31,7 +35,7 @@ All routes of this app have been thoroughly tested with many security middleware
 
 ## 02. Setup 🏗️
 
-1. Add environment variables to the ```config.env``` file at the root of the directory and follow the instructions specified. [dotenv](https://www.npmjs.com/package/dotenv) is being used to parse these environment variables.
+1. Add environment variables to the ```setup-config.txt``` file at the root of the directory and follow the instructions specified. Rename that file to ```.env``` after making the changes. [dotenv](https://www.npmjs.com/package/dotenv) is being used to parse these environment variables.
 
 2. Install all dependencies using npm by running:  ```npm i``` from the root of the directory.
 
