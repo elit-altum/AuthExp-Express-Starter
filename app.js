@@ -1,5 +1,5 @@
 require("dotenv").config({
-	path: "config.env",
+	path: ".env",
 });
 
 const path = require("path");
