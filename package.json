@@ -1,5 +1,5 @@
 {
-	"name": "express-starter-with-user-auth",
+	"name": "authexp-express-starter",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
