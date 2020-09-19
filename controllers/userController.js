@@ -87,7 +87,7 @@ exports.updatePassword = catchAsync(async (req, res) => {
 
 	const user = await User.findById(req.user.id).select("+password");
 
-	const isMatch = user.comparePassword(oldPassword, user.password);
+	const isMatch = await user.comparePassword(oldPassword, user.password);
 
 	if (!isMatch) {
 		throw new AppError("The provided password is incorrect.", 403);
