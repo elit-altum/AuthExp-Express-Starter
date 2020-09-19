@@ -35,7 +35,7 @@ All routes of this app have been thoroughly tested with many security middleware
 
 ## 02. Setup 🏗️
 
-1. Add environment variables to the ```setup-config.txt``` file at the root of the directory and follow the instructions specified. Rename that file to ```.env``` after making the changes. [dotenv](https://www.npmjs.com/package/dotenv) is being used to parse these environment variables.
+1. Add environment variables to the ```sample-config.txt``` file at the root of the directory and follow the instructions specified. Rename that file to ```.env``` after making the changes. [dotenv](https://www.npmjs.com/package/dotenv) is being used to parse these environment variables.
 
 2. Install all dependencies using npm by running:  ```npm i``` from the root of the directory.
 
