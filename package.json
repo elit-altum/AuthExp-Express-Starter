@@ -29,6 +29,9 @@
 		"xss-clean": "^0.1.1"
 	},
 	"devDependencies": {
-		"nodemon": "^2.0.4"
+		"eslint-config-prettier": "^6.11.0",
+		"eslint-plugin-prettier": "^3.1.4",
+		"nodemon": "^2.0.4",
+		"prettier": "^2.1.2"
 	}
 }
