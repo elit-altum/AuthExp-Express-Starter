@@ -29,7 +29,7 @@
 		"xss-clean": "^0.1.1"
 	},
 	"devDependencies": {
-		"eslint": "^7.9.0",
-		"nodemon": "^2.0.4"
+
+
 	}
 }

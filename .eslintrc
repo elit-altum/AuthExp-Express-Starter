@@ -3,6 +3,9 @@
     "ecmaVersion": 11
   },
   "rules": {
-    "no-console": "warn"
-  }
+    "no-console": "warn",
+    "prettier/prettier": "error"
+  },
+  "extends": ["prettier"],
+  "plugins": ["prettier"]
 }
