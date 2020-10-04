@@ -60,35 +60,65 @@ exports.signupUser = catchAsync(async (req, res) => {
 
 // *? 2. LOGIN EXISTING USER
 exports.loginUser = catchAsync(async (req, res) => {
-	const { username, password } = req.body;
+	const { username, password, email } = req.body;
 
-	// A. If username and password exist in request
-	if (!username || !password) {
-		throw new AppError("Please provide username and password!", 400);
+	// A. Check if neither username nor email is provided
+	if(!username && !email) {
+		throw new AppError("Please provide either email or username.", 400);
 	}
 
-	// B. Get user based on username
-	const tempUser = await User.findOne({ username }).select("+password");
-
-	if (!tempUser) {
-		throw new AppError("Invalid username or password.", 400);
+	// B. Check if password is provided
+	if (!password) {
+		throw new AppError("Please provide the password.", 400);
 	}
 
-	// C. Check if user password matches stored password
-	const isMatch = await tempUser.comparePassword(password, tempUser.password);
+	let user;
 
-	if (!isMatch) {
-		throw new AppError("Invalid username or password.", 400);
-	}
+	// C. Validate user credentials
+	if(username) {
+		// 1. If validating with username
 
-	// D. If user deactivated, mark him as active again
-	tempUser.isActive = true;
-	await tempUser.save({
+		const tempUser = await User.findOne({ username }).select('+password');
+		console.log(tempUser);
+
+    if (!tempUser) {
+      throw new AppError('Invalid username or password.', 400);
+    }
+
+    const isMatch = await tempUser.comparePassword(password, tempUser.password);
+
+    if (!isMatch) {
+      throw new AppError('Invalid username or password.', 400);
+		}
+		
+		user = tempUser;
+  } else {
+    // 2. If validating with email
+
+    const tempUser = await User.findOne({ email }).select('+password');
+
+    if (!tempUser) {
+      throw new AppError('Invalid email or password.', 400);
+    }
+
+    const isMatch = await tempUser.comparePassword(password, tempUser.password);
+
+    if (!isMatch) {
+      throw new AppError('Invalid email or password.', 400);
+    }
+
+    user = tempUser;
+  }
+
+	// D. Activate user account if deactivated
+	user.isActive = true;
+	await user.save({
 		validateBeforeSave: false,
 	});
 
-	tempUser.password = undefined;
-	generateJWT(tempUser, res);
+	// E. Send back server issued JWT
+	user.password = undefined;
+	generateJWT(user, res);
 });
 
 // *? 3. LOGOUT USER
